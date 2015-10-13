@@ -18,14 +18,18 @@ package se.emirbuc.solver.exceptions;
 public class EvalException extends Exception {
 
 	private static final long serialVersionUID = 7269772967859235325L;
-	String error = "Evaluation Error!";
+	private String message = "Evaluation Error!";
 
 	public EvalException() {
 	}
 
+	public EvalException(String message) {
+		this.message = message;
+	}
+
 	@Override
 	public String toString() {
-		return error;
+		return message;
 	}
 
 }
