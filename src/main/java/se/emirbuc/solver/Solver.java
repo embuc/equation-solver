@@ -7,11 +7,6 @@ import se.emirbuc.solver.exceptions.EvalException;
 import se.emirbuc.solver.exceptions.ExpectedLeftParOrNumberException;
 import se.emirbuc.solver.exceptions.ExpectedPlusRightParOrEndException;
 import se.emirbuc.solver.exceptions.ExpectingRightParOrEndException;
-import se.emirbuc.solver.exceptions.NotADivisionException;
-import se.emirbuc.solver.exceptions.NotAExponentException;
-import se.emirbuc.solver.exceptions.NotAMultiplicationException;
-import se.emirbuc.solver.exceptions.NotASubtractionException;
-import se.emirbuc.solver.exceptions.NotRightParenthesisException;
 
 /**
  * <p>
@@ -212,16 +207,12 @@ public class Solver {
 	 */
 	private long w() throws EvalException {
 		long i = 0;
-		try {
-			index++;
-			i = t();
-			if (hasMoreCharacters() && isSubtraction()) {
-				return i + w();// en fuling + :)
-			}
-			return i;
-		} catch (NotASubtractionException e) {
-			throw e;
+		index++;
+		i = t();
+		if (hasMoreCharacters() && isSubtraction()) {
+			return i + w();// en fuling + :)
 		}
+		return i;
 	}
 
 	/**
@@ -233,14 +224,10 @@ public class Solver {
 	 */
 	private long e() throws EvalException {
 		long i = 0;
-		try {
-			index++;
-			i = f();
-			if (hasMoreCharacters() && isExponent()) {
-				return (long) Math.pow(i, e());
-			}
-		} catch (NotAExponentException e) {
-			throw e;
+		index++;
+		i = f();
+		if (hasMoreCharacters() && isExponent()) {
+			return (long) Math.pow(i, e());
 		}
 		return i;
 	}
@@ -296,14 +283,10 @@ public class Solver {
 	 */
 	private long y() throws EvalException {
 		long i = 0;
-		try {
-			index++;
-			i = t();
-			if (hasMoreCharacters() && isMultiplication()) {
-				return y() * i;
-			}
-		} catch (NotAMultiplicationException e) {
-			throw e;
+		index++;
+		i = t();
+		if (hasMoreCharacters() && isMultiplication()) {
+			return y() * i;
 		}
 		return i;
 	}
@@ -317,14 +300,10 @@ public class Solver {
 	 */
 	private long d() throws EvalException {
 		long i = 0;
-		try {
-			index++;
-			i = t();
-			if (hasMoreCharacters() && isDivision()) {
-				return i / d();
-			}
-		} catch (NotADivisionException e) {
-			throw e;
+		index++;
+		i = t();
+		if (hasMoreCharacters() && isDivision()) {
+			return i / d();
 		}
 		return i;
 	}
@@ -338,13 +317,9 @@ public class Solver {
 	private long f() throws EvalException {
 		long i = 0;
 		if (isLeftParenthesis()) {
-			try {
-				index++;
-				i = start();
-				index++;
-			} catch (NotRightParenthesisException x) {
-				throw x;
-			}
+			index++;
+			i = start();
+			index++;
 		} else if (isNextSymbolNumber()) {
 			i = getNumber();
 		} else {
