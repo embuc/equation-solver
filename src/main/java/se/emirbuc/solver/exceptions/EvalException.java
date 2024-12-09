@@ -14,13 +14,12 @@ package se.emirbuc.solver.exceptions;
  * @author Emir Bucalovic
  * @version 1.0
  */
-@SuppressWarnings("javadoc")
 public class EvalException extends Exception {
 
-	private static final long serialVersionUID = 7269772967859235325L;
-	private String message = "Evaluation Error!";
+	private final String message;
 
 	public EvalException() {
+		this.message = "Evaluation failed!";
 	}
 
 	public EvalException(String message) {

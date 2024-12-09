@@ -1,35 +1,36 @@
 package se.emirbuc.solver;
 
+import se.emirbuc.solver.exceptions.EvalException;
+import se.emirbuc.solver.exceptions.ExpectedLeftParenthesesOrNumberException;
+import se.emirbuc.solver.exceptions.ExpectingRightParenthesesOrEndException;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import se.emirbuc.solver.exceptions.EvalException;
-import se.emirbuc.solver.exceptions.ExpectedLeftParOrNumberException;
-import se.emirbuc.solver.exceptions.ExpectedPlusRightParOrEndException;
-import se.emirbuc.solver.exceptions.ExpectingRightParOrEndException;
 
 /**
  * <p>
  * Description:T Lexical evaluator
  * </p>
  * <p>
+ * Represents an arithmetic expression solver with operator precedence. This class evaluates mathematical expressions following standard rules.
+ * </p>
+ * <p>
  * Copyright: Copyright (c) 2005
  * </p>
- * 
+ *
  * @author Emir Bucalovic
  * @version 1.0
  */
 public class Solver {
 
 	private String expression;
-	/** index in expression */
-	private int index;
+	/** Current index being evaluated in the expression string. */
+	private int currentIndex;
 
 	/**
-	 * Instantiates a new solver.
+	 * Initializes the solver with the given expression.
 	 *
-	 * @param expression
-	 *            the expression to be evaluated.
+	 * @param expression the mathematical expression to evaluate.
 	 */
 	public Solver(String expression) {
 		if (expression != null) {
@@ -38,315 +39,250 @@ public class Solver {
 	}
 
 	/**
-	 * Checks if next symbol is addition.
+	 * Evaluates the provided mathematical expression and returns the result.
 	 *
-	 * @return true, if is addition
-	 */
-	private boolean isAddition() {
-		if (expression.charAt(index) == '+') {
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * Checks if next symbol is subtraction.
-	 *
-	 * @return true, if is subtraction
-	 */
-	public boolean isSubtraction() {
-		if (expression.charAt(index) == '-') {
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * Checks if is next symbol multiplication.
-	 *
-	 * @return true, if is multiplication
-	 */
-	private boolean isMultiplication() {
-		if (expression.charAt(index) == '*') {
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * Checks if next symbol is division.
-	 *
-	 * @return true, if is division
-	 */
-	private boolean isDivision() {
-		if (expression.charAt(index) == '/') {
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * Checks if next symbol is exponent.
-	 *
-	 * @return true, if is exponent
-	 */
-	private boolean isExponent() {
-		if (expression.charAt(index) == '^') {
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * Checks if next symbol is factorial.
-	 *
-	 * @return true, if is factorial
-	 */
-	private boolean isFactorial() {
-		if (expression.charAt(index) == '!') {
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * Checks if next symbol is left parenthesis.
-	 *
-	 * @return true, if is left parenthesis
-	 */
-	private boolean isLeftParenthesis() {
-		if (expression.charAt(index) == '(') {
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * Checks if next symbol is right parenthesis.
-	 *
-	 * @return true, if is right parenthesis
-	 */
-	private boolean isRightParenthesis() {
-		if (expression.charAt(index) == ')') {
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * Checks if there is anything left in the string ('looks ahead').
-	 *
-	 * @return true, if possible to 'pop' more characters
-	 */
-	private boolean hasMoreCharacters() {
-		if ((index + 1) >= expression.length()) {
-			return false;
-		}
-		return true;
-	}
-
-	/**
-	 * Evaluate.
-	 *
-	 * @return the long
-	 * @throws EvalException
-	 *             the eval exception
+	 * @return the result of the evaluated expression.
+	 * @throws EvalException if the expression is invalid.
 	 */
 	public long evaluate() throws EvalException {
-		index = 0;
-		return start();
+		currentIndex = 0;
+		return parseExpression();
 	}
 
 	/**
-	 * Grammar rule "Start".
+	 * Parses and evaluates the top-level expression (handles addition and subtraction).
 	 *
-	 * @return the long
-	 * @throws EvalException
-	 *             the eval exception
+	 * @return the result of the top-level expression.
+	 * @throws EvalException if the expression is invalid.
 	 */
-	public long start() throws EvalException {
+	private long parseExpression() throws EvalException {
 		if (expression == null) {
-			throw new EvalException("Can not evaluate empty expression!");
+			throw new EvalException("Cannot evaluate an empty expression!");
 		}
+
+		long result = parseTerm();
+
+		while (hasMoreCharacters()) {
+			if (isAdditionOperator()) {
+				currentIndex++;
+				result += parseTerm();
+			} else if (isSubtractionOperator()) {
+				currentIndex++;
+				result -= parseTerm();
+			} else {
+				break;
+			}
+		}
+
+		return result;
+	}
+
+	/**
+	 * Parses and evaluates terms in the expression (handles multiplication and division).
+	 *
+	 * @return the result of the term evaluation.
+	 * @throws EvalException if the term is invalid.
+	 */
+	private long parseTerm() throws EvalException {
+		long result = parseFactor();
+
+		while (hasMoreCharacters()) {
+			if (isMultiplicationOperator()) {
+				currentIndex++;
+				result *= parseFactor();
+			} else if (isDivisionOperator()) {
+				currentIndex++;
+				long divisor = parseFactor();
+				if (divisor == 0) {
+					throw new ArithmeticException("Division by zero!");
+				}
+				result /= divisor;
+			} else {
+				break;
+			}
+		}
+
+		return result;
+	}
+
+	/**
+	 * Parses and evaluates factors in the expression (handles numbers, parentheses, factorials, and exponentiation).
+	 *
+	 * @return the result of the factor evaluation.
+	 * @throws EvalException if the factor is invalid.
+	 */
+	private long parseFactor() throws EvalException {
 		long result;
-		result = t();
-		if (hasMoreCharacters() && isAddition()) {
-			return x() + result;
-		} else if (hasMoreCharacters() && isSubtraction()) {
-			return result - w();
-		} else if (hasMoreCharacters() && !isRightParenthesis()) {
-			throw new ExpectingRightParOrEndException();
+
+		if (isLeftParenthesis()) {
+			currentIndex++;
+			result = parseExpression(); // Recursively parse the expression inside parentheses
+			if (!isRightParenthesis()) {
+				throw new ExpectingRightParenthesesOrEndException();
+			}
+			currentIndex++;
+		} else if (isNextCharacterNumber()) {
+			result = extractNumber();
+		} else {
+			throw new ExpectedLeftParenthesesOrNumberException();
+		}
+
+		// Handle factorial
+		if (hasMoreCharacters() && isFactorialOperator()) {
+			currentIndex++;
+			result = calculateFactorial(result);
+		}
+
+		// Handle exponentiation
+		if (hasMoreCharacters() && isExponentiationOperator()) {
+			currentIndex++;
+			result = calculateExponentiation(result, parseFactor());
+		}
+
+		return result;
+	}
+
+	/**
+	 * Calculates the factorial of a number.
+	 *
+	 * @param number the number to calculate the factorial for.
+	 * @return the factorial of the number.
+	 */
+	private long calculateFactorial(long number) {
+		long result = 1;
+		for (long i = number; i > 1; i--) {
+			result *= i;
 		}
 		return result;
 	}
 
 	/**
-	 * Grammar rule "X".
-	 * 
-	 * @return the long
-	 * @throws EvalException
-	 *             the eval exception
-	 */
-	private long x() throws EvalException {
-		long i;
-		index++;
-		// start again -> left - associative rule
-		i = t();
-		if (hasMoreCharacters() && isAddition()) {
-			return x() + i;
-		}
-		return i;
-	}
-
-	/**
-	 * Grammar rule "W".
+	 * Calculates the result of raising a base number to an exponent.
 	 *
-	 * @return the long
-	 * @throws EvalException
-	 *             the eval exception
+	 * @param base     the base number.
+	 * @param exponent the exponent.
+	 * @return the result of base raised to the power of exponent.
 	 */
-	private long w() throws EvalException {
-		long i = 0;
-		index++;
-		i = t();
-		if (hasMoreCharacters() && isSubtraction()) {
-			return i + w();// en fuling + :)
-		}
-		return i;
+	private long calculateExponentiation(long base, long exponent) {
+		return (long) Math.pow(base, exponent);
 	}
 
 	/**
-	 * Grammar rule "E".
+	 * Extracts a number from the current position in the expression string.
 	 *
-	 * @return the long
-	 * @throws EvalException
-	 *             the eval exception
+	 * @return the extracted number.
 	 */
-	private long e() throws EvalException {
-		long i = 0;
-		index++;
-		i = f();
-		if (hasMoreCharacters() && isExponent()) {
-			return (long) Math.pow(i, e());
-		}
-		return i;
+	private int extractNumber() {
+		String input = expression.substring(currentIndex);
+		String extractedNumber = extractNumberFromInput(input);
+		currentIndex += extractedNumber.length();
+		return Integer.parseInt(extractedNumber);
 	}
 
 	/**
-	 * Grammar rule "cf".
+	 * Extracts the numeric portion of a string starting at the beginning.
 	 *
-	 * @param i
-	 *            the i
-	 * @return the long
+	 * @param input the input string to extract the number from.
+	 * @return the extracted numeric string.
 	 */
-	private long cF(long i) {
-		long res = 1;
-		index++;
-		for (; i > 1; i--) {
-			res *= i;
-		}
-		return res;
-	}
-
-	/**
-	 * Grammar rule T.
-	 *
-	 * @return the long
-	 * @throws EvalException
-	 *             the eval exception
-	 */
-	private long t() throws EvalException {
-		long i;
-		i = f();
-		if (hasMoreCharacters() && isFactorial()) {
-			i = cF(i);
-		}
-		if (hasMoreCharacters() && isExponent()) {
-			i = (long) Math.pow(i, e());
-		}
-		if (hasMoreCharacters() && isMultiplication()) {
-			return y() * i;
-		} else if (hasMoreCharacters() && isDivision()) {
-			return i / d(); // TODO division with zero!
-		} else if (hasMoreCharacters() && !isRightParenthesis() && !isAddition() && !isSubtraction()) {
-			throw new ExpectedPlusRightParOrEndException();
-		}
-		return i;
-	}
-
-	/**
-	 * Grammar rule Y.
-	 *
-	 * @return the long
-	 * @throws EvalException
-	 *             the eval exception
-	 */
-	private long y() throws EvalException {
-		long i = 0;
-		index++;
-		i = t();
-		if (hasMoreCharacters() && isMultiplication()) {
-			return y() * i;
-		}
-		return i;
-	}
-
-	/**
-	 * Grammar rule D.
-	 *
-	 * @return the long
-	 * @throws EvalException
-	 *             the eval exception
-	 */
-	private long d() throws EvalException {
-		long i = 0;
-		index++;
-		i = t();
-		if (hasMoreCharacters() && isDivision()) {
-			return i / d();
-		}
-		return i;
-	}
-
-	/**
-	 * Grammar rule "f"
-	 * 
-	 * @return a number or partial result (of expression between parenthesis)
-	 * @throws EvalException
-	 */
-	private long f() throws EvalException {
-		long i = 0;
-		if (isLeftParenthesis()) {
-			index++;
-			i = start();
-			index++;
-		} else if (isNextSymbolNumber()) {
-			i = getNumber();
-		} else {
-			throw new ExpectedLeftParOrNumberException();
-		}
-		return i;
-	}
-
-	private int getNumber() {
-		String input = expression.substring(index);
-		String extractedNumber = extractNumber(input);
-		index += extractedNumber.length();
-		return Integer.valueOf(extractedNumber).intValue();
-	}
-
-	protected String extractNumber(String input) {
-		Pattern p = Pattern.compile("^-?\\d+");
-		Matcher m = p.matcher(input);
-		if (m.find()) {
-			return m.group();
+	protected String extractNumberFromInput(String input) {
+		Pattern pattern = Pattern.compile("^-?\\d+");
+		Matcher matcher = pattern.matcher(input);
+		if (matcher.find()) {
+			return matcher.group();
 		}
 		return null;
 	}
 
-	private boolean isNextSymbolNumber() {
-		Pattern p = Pattern.compile("^-?\\d+");
-		Matcher m = p.matcher(expression.substring(index));
-		return m.find();
+	/**
+	 * Checks if the next character in the expression is a number.
+	 *
+	 * @return true if the next character is a number, false otherwise.
+	 */
+	private boolean isNextCharacterNumber() {
+		Pattern pattern = Pattern.compile("^-?\\d+");
+		Matcher matcher = pattern.matcher(expression.substring(currentIndex));
+		return matcher.find();
+	}
+
+	/**
+	 * Checks if the current character is an addition operator ('+').
+	 *
+	 * @return true if the current character is '+', false otherwise.
+	 */
+	private boolean isAdditionOperator() {
+		return expression.charAt(currentIndex) == '+';
+	}
+
+	/**
+	 * Checks if the current character is a subtraction operator ('-').
+	 *
+	 * @return true if the current character is '-', false otherwise.
+	 */
+	private boolean isSubtractionOperator() {
+		return expression.charAt(currentIndex) == '-';
+	}
+
+	/**
+	 * Checks if the current character is a multiplication operator ('*').
+	 *
+	 * @return true if the current character is '*', false otherwise.
+	 */
+	private boolean isMultiplicationOperator() {
+		return expression.charAt(currentIndex) == '*';
+	}
+
+	/**
+	 * Checks if the current character is a division operator ('/').
+	 *
+	 * @return true if the current character is '/', false otherwise.
+	 */
+	private boolean isDivisionOperator() {
+		return expression.charAt(currentIndex) == '/';
+	}
+
+	/**
+	 * Checks if the current character is an exponentiation operator ('^').
+	 *
+	 * @return true if the current character is '^', false otherwise.
+	 */
+	private boolean isExponentiationOperator() {
+		return expression.charAt(currentIndex) == '^';
+	}
+
+	/**
+	 * Checks if the current character is a factorial operator ('!').
+	 *
+	 * @return true if the current character is '!', false otherwise.
+	 */
+	private boolean isFactorialOperator() {
+		return expression.charAt(currentIndex) == '!';
+	}
+
+	/**
+	 * Checks if the current character is a left parenthesis ('(').
+	 *
+	 * @return true if the current character is '(', false otherwise.
+	 */
+	private boolean isLeftParenthesis() {
+		return expression.charAt(currentIndex) == '(';
+	}
+
+	/**
+	 * Checks if the current character is a right parenthesis (')').
+	 *
+	 * @return true if the current character is ')', false otherwise.
+	 */
+	private boolean isRightParenthesis() {
+		return expression.charAt(currentIndex) == ')';
+	}
+
+	/**
+	 * Checks if there are more characters left in the expression to parse.
+	 *
+	 * @return true if there are more characters, false otherwise.
+	 */
+	private boolean hasMoreCharacters() {
+		return currentIndex < expression.length();
 	}
 }
