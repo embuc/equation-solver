@@ -185,7 +185,7 @@ public class Solver {
 	 * @param input the input string to extract the number from.
 	 * @return the extracted numeric string.
 	 */
-	protected String extractNumberFromInput(String input) {
+	private String extractNumberFromInput(String input) {
 		Pattern pattern = Pattern.compile("^-?\\d+");
 		Matcher matcher = pattern.matcher(input);
 		if (matcher.find()) {
