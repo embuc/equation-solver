@@ -191,7 +191,7 @@ public class Solver {
 		if (matcher.find()) {
 			return matcher.group();
 		}
-		return null;
+		throw new RuntimeException("Invalid number format!");
 	}
 
 	/**

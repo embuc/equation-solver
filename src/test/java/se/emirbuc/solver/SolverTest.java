@@ -1,12 +1,11 @@
 package se.emirbuc.solver;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import se.emirbuc.solver.exceptions.EvalException;
-
 /**
  * The <code>Class SolverTest</code>.
  *
@@ -15,10 +14,10 @@ import se.emirbuc.solver.exceptions.EvalException;
  */
 public class SolverTest {
 
-	@Test(expected = EvalException.class)
-	public void shouldHandleNullExpression() throws Exception {
+	@Test
+	public void shouldHandleNullExpression() {
 		Solver evaluator = new Solver(null);
-		evaluator.evaluate();
+		assertThrows(EvalException.class, evaluator::evaluate);
 	}
 
 	@Test
