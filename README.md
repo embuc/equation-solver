@@ -18,4 +18,4 @@ Example:
 ```java
 Solver solver = new Solver("3 + 5 * (2 - 8)^2!");
 long result = solver.evaluate();
-System.out.println(result); // Output: 963
+System.out.println(result); // Output: 183
