@@ -141,4 +141,11 @@ public class SolverTest {
 		long result = evaluator.evaluate();
 		assertEquals(16, result);
 	}
+
+	@Test
+	public void shouldHandleShowcase() throws Exception {
+		Solver evaluator = new Solver("3 + 5 * (2 - 8)^2!");
+		long result = evaluator.evaluate();
+		assertEquals(183, result);
+	}
 }
