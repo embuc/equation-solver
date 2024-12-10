@@ -19,3 +19,22 @@ Example:
 Solver solver = new Solver("3 + 5 * (2 - 8)^2!");
 long result = solver.evaluate();
 System.out.println(result); // Output: 183
+```
+## Supported Operators
+
+The following operators are supported:
+
+- `+` (Addition)
+- `-` (Subtraction)
+- `*` (Multiplication)
+- `/` (Division)
+- `!` (Factorial)
+- `^` (Exponentiation)
+- `()` (Parentheses for grouping)
+
+
+## License
+
+This project is licensed under the [MIT License](https://opensource.org/licenses/MIT). See the MIT License documentation for more details.
+
+
