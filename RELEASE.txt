@@ -1,0 +1,48 @@
+Prerequisites:
+Prepare gpg keys and sonatype credentials. In settings.xml (i.e. local file in .m2) add something like:
+(edit: jun 2024: we need to use token for login, generated at sonatype website)
+<server>
+	<id>oss-id</id>
+	<username>_your_oss_username_</username>
+	<password>_your_oss_password_</password>
+</server> 
+Create your key-pair by using gpg2. On Ubuntu you might have to install the package gnupgp. 
+Make sure you are running version 2 by executing gpg --version. The keypair can be created via:
+gpg --gen-key
+Now, the folder ~/.gnupg contains all the files needed for signing. The maven plugin in pom.xml will use these.
+You will supply your password in the bash terminal when executing the deploy command.
+Add your public key to some keyserver e.g. http://keyserver.ubuntu.com/
+First export it like this (this is ascii format that server above uses):
+gpg --armor --export {username-usually your email} > pub-asc.gpg
+then simply upload this file.
+Another alternative for key-server is keys.openpgp.org.
+-------------------------------------------------------------------------------
+To deploy a snapshot to oss sonatype nexus:
+
+mvn deploy
+
+-------------------------------------------------------------------------------
+
+To release and deploy:
+
+./release.sh
+
+-------------------------------------------------------------------------------
+
+Then the new artifact will be in the staging repository. You can close it and release it via the web interface of sonatype.
+- when running release script, you will be asked for password for gpg key (prepare it in advance)
+
+Notes on gpg:
+GPG is a tool for secure communication and data storage. It can be used to encrypt data, create digital signatures,
+and more. In this context, GPG is used to sign artifacts before they are deployed to a repository.
+D
+List Your Keys:
+
+Check whether your signing key is available:
+
+gpg --list-keys
+You should see your key listed here. If not, check the .gnupg folder (~/.gnupg) to ensure your keys are correctly imported.
+List Secret Keys:
+
+Signing requires access to your private key. Verify that it’s available by running:
+gpg --list-secret-keys

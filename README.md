@@ -32,9 +32,25 @@ The following operators are supported:
 - `^` (Exponentiation)
 - `()` (Parentheses for grouping)
 
+# Maven Configuration
+
+``` xml
+<dependencies>
+	<dependency>
+		<groupId>com.github.embuc</groupId>
+		<artifactId>equation-solver</artifactId>
+		<version>1.0</version>
+	</dependency>
+</dependencies>
+```
+
+# ChangeLog Release Notes
+
+See the [ChangeLog.txt file](changelog.txt).
 
 ## License
 
-This project is licensed under the [MIT License](https://opensource.org/licenses/MIT). See the MIT License documentation for more details.
+This project is licensed under the [ISC License](https://opensource.org/license/isc-license-txt). See the ISC License documentation for more details (There is also 
+one in the root of the project). 
 
 

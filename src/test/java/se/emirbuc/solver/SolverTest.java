@@ -148,4 +148,11 @@ public class SolverTest {
 		long result = evaluator.evaluate();
 		assertEquals(183, result);
 	}
+
+	@Test
+	public void shouldHandleChecksumSim() throws Exception {
+		Solver evaluator = new Solver("0*0 + 2*1 + 2*2 + 1*3 + 1*4 + 1*5 + 2*6 + 2*7 + 2*8");
+		long result = evaluator.evaluate();
+		assertEquals(60, result);
+	}
 }
